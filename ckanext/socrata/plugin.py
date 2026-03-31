@@ -157,10 +157,16 @@ class SocrataHarvester(HarvesterBase):
             'author': res['resource']['attribution'],
             'tags': [],
             'extras': [],
-            'identifier': res['resource']['id'],
             'owner_org': local_org,
             'resources': [],
         }
+
+        # Store identifier as an extra so _get_existing_dataset() can find it
+        # on subsequent harvests (it queries package_extra for key='identifier')
+        package_dict['extras'].append({
+            'key': 'identifier',
+            'value': res['resource']['id'],
+        })
         # Add tags
         package_dict['tags'] = \
             [{'name': munge_tag(t)}
@@ -414,6 +420,7 @@ class SocrataHarvester(HarvesterBase):
                 return 'unchanged'
 
             package_dict['id'] = existing_dataset['id']
+            package_dict['name'] = existing_dataset['name']
             harvest_object.package_id = package_dict['id']
             harvest_object.add()
             try:
